@@ -13,10 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::get('/', 'App\Http\Controllers\PageController@index')->name('index');
 
-Route::get('/add-task', function () {
-    return view('add-task');
-})->name('add-task');
+//Sortable Functionality
+Route::post('sort', '\Rutorika\Sortable\SortableController@sort');

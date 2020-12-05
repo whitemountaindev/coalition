@@ -165,6 +165,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Rutorika\Sortable\SortableServiceProvider::class,
 
         /*
          * Application Service Providers...
