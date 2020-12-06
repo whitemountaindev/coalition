@@ -53,4 +53,11 @@ class PageController extends Controller
         return redirect()->back();
 
     }
+
+    public function createProject(Request $request)
+    {
+        $project = new Project;
+        $project->name = $request->name;
+        $project->save();
+    }
 }

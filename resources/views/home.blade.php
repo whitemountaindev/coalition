@@ -8,6 +8,7 @@
           <h1 class="mt-5">Task Manager</h1>
           <div style="margin-bottom:1rem;">
           <button class="btn btn-primary" data-toggle="modal" data-target="#createModal">Add Task</button>
+          <button class="btn btn-primary" data-toggle="modal" data-target="#projectModal">Add Project</button>
           </div>
           <table id="tasksTable" class="display">
             <thead>
@@ -107,6 +108,30 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" id="editTask">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Project Modal -->
+<div class="modal fade" id="projectModal" tabindex="-1" role="dialog" aria-labelledby="projectModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="projectModalLabel">Create New Project</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="projectName">Project Name</label>
+          <input type="text" id="projectName" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="newProjectButton">Save Task</button>
       </div>
     </div>
   </div>
@@ -263,6 +288,33 @@
               success: function(e) {
                   console.log('Success!');
                   $('#createModal').modal('hide');
+                  location.reload();
+              },
+              error: function(e) {
+                console.log('failure', e);
+              }
+      });
+  });
+  </script>
+
+  <!-- Create new project -->
+  <script type="text/javascript">
+  $("#newProjectButton").on("click", function(){
+
+      name = $('#projectName').val();
+
+      $.ajax({
+              headers: {
+                  'X-CSRF-TOKEN': '{!! csrf_token() !!}'
+              },
+              data: {
+                  name: name,
+              },
+              method: 'POST',
+              url: '{!! route('create_project') !!}',
+              success: function(e) {
+                  console.log('Success!');
+                  $('#projectModal').modal('hide');
                   location.reload();
               },
               error: function(e) {
