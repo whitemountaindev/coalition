@@ -9,6 +9,10 @@ class Task extends Model
 {
     // Add Sortable Functionality
     use \Rutorika\Sortable\SortableTrait;
-    
     use HasFactory;
+
+    public function project()
+    {
+        return $this->belongsTo('App\Models\Project');
+    }
 }

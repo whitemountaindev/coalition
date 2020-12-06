@@ -14,15 +14,30 @@
               <tr>
                 <th></th>
                 <th>Name</th>
+                <th>Project</th>
                 <th>Created</th>
+                <th></th>
               </tr>
             </thead>
             <tbody class="sortable" data-entityname="tasks">
             @foreach($tasks as $task)
-            <tr data-itemId="{{{ $task->id }}}">
+            <tr data-itemId="{{ $task->id }}">
                 <td class="sortable-handle"><img src="/images/sort.png" height="15px"></td>
                 <td>{{ $task->name }}</td>
+                @if($task->project != null)
+                <td>{{ $task->project->name }}</td>
+                @else
+                <td></td>
+                @endif
                 <td>{{ $task->created_at }}</td>
+                <td>
+                  <a href="#" class="editTaskModalLink" data-target="#editModal" data-toggle="modal" data-id="{{ $task->id }}" data-name="{{ $task->name }}" data-priority="{{ $task->position }}" data-project="{{ $task->project->id }}" style="margin-left: 5px; text-decoration: none;">
+                    Edit</span>
+                  </a>
+                  <a class="delete-link" href="{{ route('delete_task', ['id' => $task->id]) }}" style="margin-left: 5px; text-decoration: none;">
+                  Delete</span>
+                  </a>
+                </td>
               </tr>
             @endforeach
             </tbody>
@@ -47,7 +62,13 @@
           <label for="newTaskName">Task Name</label>
           <input type="text" id="newTaskName" class="form-control">
           <label for="newPriority">Task Priority</label>
-          <input type="text" id="newPriority" class="form-control">
+          <input type="number" id="newPriority" class="form-control" min="1">
+          <label for="newProject">Task Project</label>
+          <select name="newProject" id="newProject" class="form-control">
+            @foreach($projects as $project)
+              <option value="{{ $project->id }}"> {{ $project->name }}</option>
+            @endforeach
+          </select>
         </div>
       </div>
       <div class="modal-footer">
@@ -57,17 +78,48 @@
     </div>
   </div>
 </div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Create New Task</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="editTaskName">Task Name</label>
+          <input type="text" id="editTaskName" class="form-control">
+          <label for="editPriority">Task Priority</label>
+          <input type="number" id="editPriority" class="form-control" min="1">
+          <label for="editProject">Task Project</label>
+          <select id="editProject" class="form-control">
+            @foreach($projects as $project)
+              <option value="{{ $project->id }}">{{ $project->name }}</option>
+            @endforeach
+          </select>
+          <input type="hidden" id="hidden_edit_id">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="editTask">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
   @endsection
 
   @section('scripts')
   <!-- Initializes DataTable -->
     <script>
-    $(document).ready( function () {
-    $('#tasksTable').DataTable({
-      // "bPaginate": false,
-      // "bFilter": false,
-    });
-    } );
+      $(document).ready(function() {
+       $('#tasksTable').DataTable( {
+          } );
+      } );
     </script>
 
   <!-- Initializes Sortable Trait -->
@@ -143,6 +195,7 @@
 
       name = $('#newTaskName').val();
       priority = $('#newPriority').val();
+      project = $('#newProject').val();
 
       $.ajax({
               headers: {
@@ -151,13 +204,66 @@
               data: {
                   name: name,
                   priority: priority,
+                  project: project,
               },
               method: 'POST',
               url: '{!! route('create_task') !!}',
               success: function(e) {
                   console.log('Success!');
                   $('#createModal').modal('hide');
-                  // location.reload();
+                  location.reload();
+              },
+              error: function(e) {
+                console.log('failure', e);
+              }
+      });
+  });
+  </script>
+
+<!-- Pass Task Object Values To Edit Modal -->
+  <script>
+    $('.editTaskModalLink').click(function(e) {
+        var link             = $(this);
+        var id               = link.data("id")
+        var name             = link.data("name")
+        var project          = link.data("project")
+        //One issue I didn't quite have time to work through is this priority variable. When sorting Tasks with drag-and-drop the database is automatically updated to reflect the change. But when the page is loaded, the $task->position will not change until a page reload. If I had another half-hour or so I could really get this polished, but I believe I've spent too much time on it already.
+
+        var priority         = link.data("priority")
+
+        $("#hidden_edit_id").val(id);
+        $('#editTaskName').val(name)
+        $('#editProject').val(project)
+        $('#editPriority').val(priority)
+    });
+  </script>
+
+  <!-- Update task -->
+  <script type="text/javascript">
+  $("#editTask").on("click", function(){
+
+      name = $('#editTaskName').val();
+      priority = $('#editPriority').val();
+      project = $('#editProject').val();
+      id = $('#hidden_edit_id').val();
+  
+
+      $.ajax({
+              headers: {
+                  'X-CSRF-TOKEN': '{!! csrf_token() !!}'
+              },
+              data: {
+                  name: name,
+                  priority: priority,
+                  project: project,
+                  id: id,
+              },
+              method: 'PATCH',
+              url: '{!! route('edit_task') !!}',
+              success: function(e) {
+                  console.log('Success!');
+                  $('#createModal').modal('hide');
+                  location.reload();
               },
               error: function(e) {
                 console.log('failure', e);
