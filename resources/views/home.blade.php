@@ -25,14 +25,14 @@
             <tr data-itemId="{{ $task->id }}">
                 <td class="sortable-handle"><img src="/images/sort.png" height="15px"></td>
                 <td>{{ $task->name }}</td>
-                @if($task->project != null)
+                @if(isset($task->project))
                 <td>{{ $task->project->name }}</td>
                 @else
                 <td></td>
                 @endif
                 <td>{{ $task->created_at }}</td>
                 <td>
-                  <a href="#" class="editTaskModalLink" data-target="#editModal" data-toggle="modal" data-id="{{ $task->id }}" data-name="{{ $task->name }}" data-priority="{{ $task->position }}" data-project="{{ $task->project->id }}" style="margin-left: 5px; text-decoration: none;">
+                  <a href="#" class="editTaskModalLink" data-target="#editModal" data-toggle="modal" data-id="{{ $task->id }}" data-name="{{ $task->name }}" data-priority="{{ $task->position }}" data-project="{{ isset($task->project) ? $task->project->id : "" }}" style="margin-left: 5px; text-decoration: none;">
                     Edit</span>
                   </a>
                   <a class="delete-link" href="{{ route('delete_task', ['id' => $task->id]) }}" style="margin-left: 5px; text-decoration: none;">
